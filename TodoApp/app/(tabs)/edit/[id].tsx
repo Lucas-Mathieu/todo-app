@@ -1,13 +1,18 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TaskDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#7d7d7d" />
+        </TouchableOpacity>
         <Text style={styles.title}>Détail de la tâche</Text>
         <Text style={styles.id}>ID : {id}</Text>
       </View>
@@ -22,6 +27,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    padding: 8,
+    zIndex: 10,
   },
   title: {
     fontSize: 22,
