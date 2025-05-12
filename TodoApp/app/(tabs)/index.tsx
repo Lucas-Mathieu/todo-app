@@ -1,31 +1,42 @@
-import { StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { Link, useRouter, Stack } from 'expo-router';
+import TaskList from '../../components/TaskList';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+const tasks = [
+  { id: '1', title: 'Acheter du pain', completed: false },
+  { id: '2', title: 'Faire les devoirs', completed: true },
+];
 
-export default function TabOneScreen() {
+export default function HomeScreen() {
+  const router = useRouter();
+
+  const handleTaskPress = (id: string) => {
+    router.push({ pathname: '/(tabs)/edit/[id]', params: { id } });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.container}>
+        <Text style={styles.title}>Mes tâches</Text>
+        <TaskList tasks={tasks} onTaskPress={handleTaskPress} />
+        <Link href="/add" asChild>
+          <Button title="Ajouter une tâche" />
+        </Link>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+    marginBottom: 16,
   },
 });
