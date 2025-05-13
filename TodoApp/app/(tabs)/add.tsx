@@ -6,6 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AddTaskScreen() {
   const router = useRouter();
 
+  const handleSubmit = (title: string) => {
+    // logique à compléter
+    router.back();
+  };
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -13,7 +18,7 @@ export default function AddTaskScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#7d7d7d" />
         </TouchableOpacity>
-        <TaskForm onSubmit={title => { /* Ajoute la tâche */ }} />
+        <TaskForm onSubmit={handleSubmit} />
       </View>
     </>
   );
