@@ -1,19 +1,25 @@
-// src/components/TaskForm.tsx
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet } from 'react-native';
 
 type TaskFormProps = {
-  initialValue?: string;
-  onSubmit: (title: string) => void;
+  initialTitle?: string;
+  initialDescription?: string;
+  onSubmit: (title: string, description: string) => void;
 };
 
-const TaskForm = ({ initialValue = '', onSubmit }: TaskFormProps) => {
-  const [title, setTitle] = useState(initialValue);
+const TaskForm: React.FC<TaskFormProps> = ({
+  initialTitle = '',
+  initialDescription = '',
+  onSubmit,
+}) => {
+  const [title, setTitle] = useState(initialTitle);
+  const [description, setDescription] = useState(initialDescription);
 
   const handleSubmit = () => {
     if (title.trim()) {
-      onSubmit(title.trim());
+      onSubmit(title.trim(), description.trim());
       setTitle('');
+      setDescription('');
     }
   };
 
@@ -22,27 +28,43 @@ const TaskForm = ({ initialValue = '', onSubmit }: TaskFormProps) => {
       <TextInput
         value={title}
         onChangeText={setTitle}
-        placeholder="Ajouter une tâche"
+        placeholder="Titre de la tâche"
         style={styles.input}
       />
-      <Button title="Valider" onPress={handleSubmit} />
+      <TextInput
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Description (optionnel)"
+        style={[styles.input, styles.description]}
+        multiline
+      />
+      <View style={styles.buttonContainer}>
+        <Button title="Valider" onPress={handleSubmit} />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   form: {
-    flexDirection: 'row',
-    marginVertical: 8,
-    alignItems: 'center',
+    width: '100%',
+    marginTop: 40,
   },
   input: {
-    flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 4,
-    padding: 8,
-    marginRight: 8,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+    marginBottom: 16,
+  },
+  description: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    marginTop: 8,
   },
 });
 

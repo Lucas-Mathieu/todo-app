@@ -1,29 +1,72 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { Link, useRouter, Stack } from 'expo-router';
 import TaskList from '../../components/TaskList';
+import Container from '../../components/Container';
 
-const tasks = [
-  { id: '1', title: 'Acheter du pain', completed: false },
-  { id: '2', title: 'Faire les devoirs', completed: true },
+type Task = {
+  id: number;
+  title: string;
+  description?: string;
+  completed: boolean;
+};
+
+const initialTasks: Task[] = [
+  { id: 1, title: 'Acheter du pain', completed: false },
+  { id: 2, title: 'Faire les devoirs', completed: true },
 ];
 
 export default function HomeScreen() {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const router = useRouter();
 
-  const handleTaskPress = (id: string) => {
-    router.push({ pathname: '/(tabs)/edit/[id]', params: { id } });
+  // Marquer comme (non) terminée
+  const handleToggleComplete = (id: number) => {
+    setTasks(tasks =>
+      tasks.map(task =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  // Aller vers la page d'édition
+  const handleEdit = (id: number) => {
+    router.push({ pathname: '/(tabs)/edit/[id]', params: { id: id.toString() } });
+  };
+
+  // Supprimer une tâche
+  const handleDelete = (id: number) => {
+    Alert.alert(
+      "Supprimer la tâche",
+      "Voulez-vous vraiment supprimer cette tâche ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => setTasks(tasks => tasks.filter(task => task.id !== id)),
+        },
+      ]
+    );
   };
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>Mes tâches</Text>
-        <TaskList tasks={tasks} onTaskPress={handleTaskPress} />
-        <Link href="/add" asChild>
-          <Button title="Ajouter une tâche" />
-        </Link>
-      </View>
+      <Container>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.container}>
+          <Text style={styles.title}>Mes tâches</Text>
+          <TaskList
+            tasks={tasks}
+            onToggleComplete={handleToggleComplete}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <Link href="/add" asChild>
+            <Button title="Ajouter une tâche" />
+          </Link>
+        </View>
+      </Container>
     </>
   );
 }

@@ -1,4 +1,3 @@
-// src/components/Container.tsx
 import React from 'react';
 import { View, StyleSheet, ViewProps } from 'react-native';
 
@@ -6,7 +5,7 @@ type ContainerProps = ViewProps & {
   children: React.ReactNode;
 };
 
-const Container = ({ children, style, ...props }: ContainerProps) => (
+const Container: React.FC<ContainerProps> = ({ children, style, ...props }) => (
   <View style={[styles.container, style]} {...props}>
     {children}
   </View>
@@ -14,11 +13,9 @@ const Container = ({ children, style, ...props }: ContainerProps) => (
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    flex: 1,
+    padding: 4,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    marginVertical: 8,
-    elevation: 2,
   },
 });
 
