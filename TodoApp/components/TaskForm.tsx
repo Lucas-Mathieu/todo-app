@@ -1,26 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+
+const CATEGORIES = ['Travail', 'Personnel', 'Courses', 'Autre'];
 
 type TaskFormProps = {
   initialTitle?: string;
   initialDescription?: string;
-  onSubmit: (title: string, description: string) => void;
+  initialCategory?: string;
+  onSubmit: (title: string, description: string, category: string) => void;
 };
 
 const TaskForm: React.FC<TaskFormProps> = ({
   initialTitle = '',
   initialDescription = '',
+  initialCategory = CATEGORIES[0],
   onSubmit,
 }) => {
-  const [title, setTitle] = useState(initialTitle);
-  const [description, setDescription] = useState(initialDescription);
+  const [title, setTitle] = React.useState(initialTitle);
+  const [description, setDescription] = React.useState(initialDescription);
+  const [category, setCategory] = React.useState(initialCategory);
+
+  React.useEffect(() => {
+    setTitle(initialTitle);
+    setDescription(initialDescription);
+    setCategory(initialCategory);
+  }, [initialTitle, initialDescription, initialCategory]);
 
   const handleSubmit = () => {
-    if (title.trim()) {
-      onSubmit(title.trim(), description.trim());
-      setTitle('');
-      setDescription('');
-    }
+    onSubmit(title, description, category);
+    setTitle('');
+    setDescription('');
+    setCategory(CATEGORIES[0]);
   };
 
   return (
@@ -38,6 +49,15 @@ const TaskForm: React.FC<TaskFormProps> = ({
         style={[styles.input, styles.description]}
         multiline
       />
+      <Picker
+        selectedValue={category}
+        onValueChange={setCategory}
+        style={styles.input}
+      >
+        {CATEGORIES.map(cat => (
+          <Picker.Item label={cat} value={cat} key={cat} />
+        ))}
+      </Picker>
       <View style={styles.buttonContainer}>
         <Button title="Valider" onPress={handleSubmit} />
       </View>
@@ -46,10 +66,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 };
 
 const styles = StyleSheet.create({
-  form: {
-    width: '100%',
-    marginTop: 40,
-  },
+  form: { width: '100%', marginTop: 40 },
   input: {
     borderColor: '#ccc',
     borderWidth: 1,
@@ -63,9 +80,7 @@ const styles = StyleSheet.create({
     height: 80,
     textAlignVertical: 'top',
   },
-  buttonContainer: {
-    marginTop: 8,
-  },
+  buttonContainer: { marginTop: 8 },
 });
 
 export default TaskForm;

@@ -1,19 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList } from 'react-native';
 import TaskItem from './TaskItem';
-
-type Task = {
-  id: number;
-  title: string;
-  description?: string;
-  completed: boolean;
-};
+import ModalTaskDetail from './ModalTaskDetail';
+import type { Task } from '../context/TaskContext';
 
 type TaskListProps = {
   tasks: Task[];
   onToggleComplete: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  getCategoryColor: (category: string) => string;
 };
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -21,22 +17,33 @@ const TaskList: React.FC<TaskListProps> = ({
   onToggleComplete,
   onEdit,
   onDelete,
-}) => (
-  <FlatList
-    data={tasks}
-    keyExtractor={item => item.id.toString()}
-    renderItem={({ item }) => (
-      <TaskItem
-        id={item.id}
-        title={item.title}
-        description={item.description}
-        completed={item.completed}
-        onToggleComplete={onToggleComplete}
-        onEdit={onEdit}
-        onDelete={onDelete}
+  getCategoryColor,
+}) => {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  return (
+    <>
+      <FlatList
+        data={tasks}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <TaskItem
+            {...item}
+            onToggleComplete={onToggleComplete}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onShowDetail={setSelectedTask}
+            categoryColor={getCategoryColor(item.category)}
+          />
+        )}
       />
-    )}
-  />
-);
+      <ModalTaskDetail
+        visible={!!selectedTask}
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+      />
+    </>
+  );
+};
 
 export default TaskList;

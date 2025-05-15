@@ -4,34 +4,32 @@ import { Stack, useRouter } from 'expo-router';
 import TaskForm from '../../components/TaskForm';
 import Container from '../../components/Container';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskActions } from '../../hooks/useTaskActions';
 
 export default function AddTaskScreen() {
   const router = useRouter();
+  const { addTask } = useTaskActions();
 
-  const handleSubmit = (title: string, description: string) => {
-    const newTask = {
-      id: Date.now(), // ou un uuid si tu préfères
+  const handleSubmit = (title: string, description: string, category: string) => {
+    addTask({
       title,
       description,
       completed: false,
-    };
-    // Ajoute la tâche à ta liste globale ici (context, redux, etc.)
-    // Exemple : addTask(newTask);
+      category,
+    });
     router.back();
   };
 
   return (
-    <>
-      <Container>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View style={styles.container}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#7d7d7d" />
-          </TouchableOpacity>
-          <TaskForm onSubmit={handleSubmit} />
-        </View>
-      </Container>
-    </>
+    <Container>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} />
+        </TouchableOpacity>
+        <TaskForm onSubmit={handleSubmit} />
+      </View>
+    </Container>
   );
 }
 
