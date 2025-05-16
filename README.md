@@ -3,7 +3,7 @@
 ## 1. Cloner le projet
 
 ```sh
-git clone <URL_DU_REPO>
+git clone https://github.com/Lucas-Mathieu/todo-app.git
 cd TodoApp
 ```
 
