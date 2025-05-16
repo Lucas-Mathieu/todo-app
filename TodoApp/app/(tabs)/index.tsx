@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { Link, useRouter, Stack } from 'expo-router';
-import TaskList from '../../components/TaskList';
-import Container from '../../components/Container';
+import TaskList from '@/components/TaskList';
+import Container from '@/components/Container';
 import { useTasks } from '@/context/TaskContext';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { Status, Category } from '@/types';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Travail: '#1976D2',
-  Personnel: '#9C27B0',
-  Courses: '#fc0303',
-  Autre: '#E67E22',
+// Couleurs des catégories via enum
+const CATEGORY_COLORS: Record<Category, string> = {
+  [Category.TRAVAIL]: '#1976D2',
+  [Category.PERSONNEL]: '#9C27B0',
+  [Category.COURSES]: '#fc0303',
+  [Category.AUTRE]: '#E67E22',
 };
 
-// Statuts (bulles vertes)
+// Configuration des statuts (utilise l'enum Status)
 const STATUSES = [
-  { value: 'active', label: 'En cours', color: '#43A047' },
-  { value: 'completed', label: 'Terminées', color: '#388E3C' }
+  { value: Status.ACTIVE, label: 'En cours', color: '#43A047' },
+  { value: Status.COMPLETED, label: 'Terminées', color: '#388E3C' }
 ];
 
-// Catégories (bulles colorées)
+// Configuration des catégories (utilise l'enum Category)
 const CATEGORIES = [
-  { value: 'Travail', label: 'Travail', color: CATEGORY_COLORS['Travail'] },
-  { value: 'Personnel', label: 'Personnel', color: CATEGORY_COLORS['Personnel'] },
-  { value: 'Courses', label: 'Courses', color: CATEGORY_COLORS['Courses'] },
-  { value: 'Autre', label: 'Autre', color: CATEGORY_COLORS['Autre'] }
+  { value: Category.TRAVAIL, label: 'Travail', color: CATEGORY_COLORS[Category.TRAVAIL] },
+  { value: Category.PERSONNEL, label: 'Personnel', color: CATEGORY_COLORS[Category.PERSONNEL] },
+  { value: Category.COURSES, label: 'Courses', color: CATEGORY_COLORS[Category.COURSES] },
+  { value: Category.AUTRE, label: 'Autre', color: CATEGORY_COLORS[Category.AUTRE] }
 ];
 
-export const getCategoryColor = (category: string) =>
+// Helper pour obtenir la couleur d'une catégorie (type-safe)
+export const getCategoryColor = (category: Category) =>
   CATEGORY_COLORS[category] || '#757575';
 
 export default function HomeScreen() {
@@ -35,18 +38,18 @@ export default function HomeScreen() {
   const { toggleTask, deleteTask } = useTaskActions();
   const router = useRouter();
 
-  // null = aucun filtre actif
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'active' | 'completed' | null>(null);
+  // States typés avec les enums
+  const [categoryFilter, setCategoryFilter] = useState<Category | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Status | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filtrage combiné
+  // Filtrage avec vérification des enums
   const filteredTasks = tasks.filter(task => {
     const matchesCategory = !categoryFilter || task.category === categoryFilter;
     const matchesStatus =
       !statusFilter ||
-      (statusFilter === 'completed' && task.completed) ||
-      (statusFilter === 'active' && !task.completed);
+      (statusFilter === Status.COMPLETED && task.completed) ||
+      (statusFilter === Status.ACTIVE && !task.completed);
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (task.description?.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -70,11 +73,12 @@ export default function HomeScreen() {
     );
   };
 
-  // Gestion du clic sur une bulle (désélection si déjà sélectionné)
-  const handleCategoryPress = (category: string) => {
+  // Gestion des filtres avec types stricts
+  const handleCategoryPress = (category: Category) => {
     setCategoryFilter(prev => prev === category ? null : category);
   };
-  const handleStatusPress = (status: 'active' | 'completed') => {
+
+  const handleStatusPress = (status: Status) => {
     setStatusFilter(prev => prev === status ? null : status);
   };
 
@@ -84,7 +88,6 @@ export default function HomeScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Mes tâches</Text>
 
-        {/* Champ de recherche */}
         <TextInput
           style={styles.searchInput}
           placeholder="Rechercher une tâche..."
@@ -92,14 +95,13 @@ export default function HomeScreen() {
           onChangeText={setSearchQuery}
         />
 
-        {/* Scrollbar horizontale : statuts PUIS catégories */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterScroll}
           contentContainerStyle={styles.filterScrollContent}
         >
-          {/* Statuts (bulles vertes) */}
+          {/* Statuts utilisant l'enum */}
           {STATUSES.map(status => (
             <TouchableOpacity
               key={status.value}
@@ -110,7 +112,7 @@ export default function HomeScreen() {
                   borderColor: status.color,
                 }
               ]}
-              onPress={() => handleStatusPress(status.value as 'active' | 'completed')}
+              onPress={() => handleStatusPress(status.value)}
               activeOpacity={0.7}
             >
               <Text
@@ -126,7 +128,8 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           ))}
-          {/* Catégories (bulles colorées) */}
+
+          {/* Catégories utilisant l'enum */}
           {CATEGORIES.map(category => (
             <TouchableOpacity
               key={category.value}
@@ -155,16 +158,14 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* Liste des tâches filtrées */}
         <TaskList
           tasks={filteredTasks}
           onToggleComplete={handleToggleComplete}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          getCategoryColor={getCategoryColor} // <-- Passe la fonction pour colorer les tâches
+          getCategoryColor={getCategoryColor}
         />
 
-        {/* Bouton d'ajout */}
         <Link href="/add" asChild>
           <TouchableOpacity style={styles.addButton}>
             <Text style={styles.addButtonText}>Ajouter une tâche</Text>

@@ -1,6 +1,6 @@
-const API_URL = 'http://192.168.1.205:3001/tasks';
+const API_URL = 'http://VOTRE-IP:3001/tasks';
 
-import type { Task } from '@/context/TaskContext';
+import type { Task } from '@/types';
 
 export const TaskApiService = {
   async fetchTasks(): Promise<Task[]> {
@@ -10,13 +10,17 @@ export const TaskApiService = {
   },
 
   async addTask(task: Omit<Task, 'id'>): Promise<Task> {
+    console.log('[TaskApiService] Adding task:', task);
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(task),
     });
+    console.log('[TaskApiService] Response status:', response.status);
     if (!response.ok) throw new Error('Erreur lors de l\'ajout');
-    return response.json();
+    const createdTask = await response.json();
+    console.log('[TaskApiService] Created task:', createdTask);
+    return createdTask;
   },
 
   async updateTask(id: number, updates: Partial<Task>): Promise<Task> {

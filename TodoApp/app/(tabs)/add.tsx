@@ -1,21 +1,23 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import TaskForm from '../../components/TaskForm';
-import Container from '../../components/Container';
+import TaskForm from '@/components/TaskForm';
+import Container from '@/components/Container';
 import { Ionicons } from '@expo/vector-icons';
-import { useTaskActions } from '../../hooks/useTaskActions';
+import { useTaskActions } from '@/hooks/useTaskActions';
+import { Category } from '@/types';
 
 export default function AddTaskScreen() {
   const router = useRouter();
   const { addTask } = useTaskActions();
 
-  const handleSubmit = (title: string, description: string, category: string) => {
+  const handleSubmit = (title: string, description: string, category: Category, dueDate?: string) => {
     addTask({
       title,
       description,
       completed: false,
       category,
+      dueDate,
     });
     router.back();
   };

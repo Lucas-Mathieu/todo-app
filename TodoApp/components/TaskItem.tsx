@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import type { Task } from '../context/TaskContext';
+import type { Task } from '@/context/TaskContext';
+import { Category } from '@/types';
 
 type TaskItemProps = {
   id: number;
   title: string;
   description?: string;
   completed: boolean;
-  category: string;
+  category: Category;
+  dueDate?: string;
   categoryColor: string;
   onToggleComplete: (id: number) => void;
   onEdit: (id: number) => void;
@@ -21,6 +23,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   description,
   completed,
   category,
+  dueDate,
   categoryColor,
   onToggleComplete,
   onEdit,
@@ -35,7 +38,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <TouchableOpacity
         style={styles.textContainer}
         onPress={() =>
-          onShowDetail({ id, title, description, completed, category })
+          onShowDetail({ id, title, description, completed, category, dueDate })
         }
       >
         <Text style={[styles.title, completed && styles.completedText]}>{title}</Text>
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   completedTask: {
-    backgroundColor: '#f8f8f8'
+    backgroundColor: '#f8f8f8',
   },
   checkbox: {
     width: 24,
@@ -82,21 +85,21 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#3498db',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   checked: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#3498db'
+    backgroundColor: '#3498db',
   },
   textContainer: {
     flex: 1,
-    marginLeft: 10
+    marginLeft: 10,
   },
   title: {
     fontSize: 16,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   description: {
     fontSize: 14,
@@ -106,7 +109,7 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: '#999'
+    color: '#999',
   },
   category: {
     marginTop: 4,
@@ -114,15 +117,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   actions: {
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   actionText: {
     color: '#3498db',
-    marginLeft: 15
+    marginLeft: 15,
   },
   deleteText: {
-    color: '#e74c3c'
-  }
+    color: '#e74c3c',
+  },
 });
 
 export default TaskItem;

@@ -18,20 +18,38 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 // POST create task
 router.post('/', async (req: Request, res: Response) => {
-  const { title, description, category } = req.body;
+  const { title, description, category, completed, dueDate } = req.body;
   if (!title || !category) return res.status(400).json({ error: 'Missing fields' });
-  const newTask = await TaskService.createTask({ title, description, category });
-  res.status(201).json(newTask);
+  try {
+    const newTask = await TaskService.createTask({
+      title,
+      description,
+      category,
+      completed,
+      dueDate,
+    });
+    res.status(201).json(newTask);
+  } catch (error) {
+    console.error('Error creating task:', error);
+    res.status(500).json({ error: 'Failed to create task' });
+  }
 });
 
 // PUT update task
 router.put('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
-  const { title, description, completed, category } = req.body;
+  const { title, description, completed, category, dueDate } = req.body;
   try {
-    const updated = await TaskService.updateTask(id, { title, description, completed, category });
+    const updated = await TaskService.updateTask(id, {
+      title,
+      description,
+      completed,
+      category,
+      dueDate,
+    });
     res.json(updated);
   } catch (err) {
+    console.error('Error updating task:', err);
     res.status(404).json({ error: 'Not found' });
   }
 });
@@ -42,6 +60,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     await TaskService.deleteTask(Number(req.params.id));
     res.status(204).end();
   } catch (err) {
+    console.error('Error deleting task:', err);
     res.status(404).json({ error: 'Not found' });
   }
 });

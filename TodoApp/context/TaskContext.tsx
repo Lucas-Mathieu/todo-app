@@ -1,16 +1,17 @@
 import React, { createContext, useReducer, useContext, ReactNode, useEffect } from 'react';
+import * as Notifications from 'expo-notifications';
 import { TaskApiService } from '@/services/TaskApiService';
+import { Category } from '@/types';
 
-// Type d'une tâche
 export type Task = {
   id: number;
   title: string;
   description?: string;
   completed: boolean;
-  category: string;
+  category: Category;
+  dueDate?: string;
 };
 
-// Actions possibles
 type Action =
   | { type: 'SET_TASKS'; payload: Task[] }
   | { type: 'ADD_TASK'; payload: Task }
@@ -18,7 +19,6 @@ type Action =
   | { type: 'DELETE_TASK'; payload: number }
   | { type: 'TOGGLE_TASK'; payload: number };
 
-// Reducer
 function taskReducer(state: Task[], action: Action): Task[] {
   switch (action.type) {
     case 'SET_TASKS':
@@ -40,7 +40,6 @@ function taskReducer(state: Task[], action: Action): Task[] {
   }
 }
 
-// Contexte
 const TaskContext = createContext<{
   tasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => Promise<void>;
@@ -55,52 +54,90 @@ const TaskContext = createContext<{
   toggleTask: async () => {},
 });
 
-// Provider
+// Planification notification
+async function scheduleNotification(task: Task) {
+  if (!task.dueDate) {
+    console.log('[TaskProvider] No dueDate, skipping notification for task:', task);
+    return;
+  }
+
+  const triggerDate = new Date(task.dueDate);
+
+  if (triggerDate.getTime() < Date.now()) {
+    console.warn('[TaskProvider] Due date is in the past, skipping notification:', triggerDate);
+    return;
+  }
+
+  console.log('[TaskProvider] Scheduling notification for:', task);
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: task.id.toString(),
+    content: {
+      title: task.title,
+      body: task.description || 'Rappel de tâche',
+      data: { taskId: task.id },
+    },
+    trigger: {
+      type: 'date',
+      date: triggerDate,
+    },
+  });
+}
+
+// Annulation notification
+async function cancelNotification(taskId: number) {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(taskId.toString());
+  } catch {}
+}
+
 export function TaskProvider({ children }: { children: ReactNode }) {
   const [tasks, dispatch] = useReducer(taskReducer, []);
 
-  // Chargement initial des tâches
   useEffect(() => {
     TaskApiService.fetchTasks()
-      .then(fetchedTasks => dispatch({ type: 'SET_TASKS', payload: fetchedTasks }))
+      .then(fetchedTasks => {
+        dispatch({ type: 'SET_TASKS', payload: fetchedTasks });
+      })
       .catch(err => {
-        console.error('Erreur de chargement des tâches', err);
+        console.error('[TaskProvider] Erreur lors du chargement des tâches', err);
       });
   }, []);
 
-  // Ajout d'une tâche
   const addTask = async (task: Omit<Task, 'id'>) => {
     try {
       const created = await TaskApiService.addTask(task);
       dispatch({ type: 'ADD_TASK', payload: created });
+      if (created.dueDate) await scheduleNotification(created);
     } catch (err) {
-      console.error('Erreur lors de l\'ajout', err);
+      console.error('[TaskProvider] Erreur lors de l\'ajout', err);
     }
   };
 
-  // Edition d'une tâche
   const editTask = async (task: Task) => {
     try {
+      const previousTask = tasks.find(t => t.id === task.id);
+      if (previousTask?.dueDate) await cancelNotification(task.id);
       const updated = await TaskApiService.updateTask(task.id, task);
       dispatch({ type: 'EDIT_TASK', payload: updated });
+      if (updated.dueDate) await scheduleNotification(updated);
     } catch (err) {
-      console.error('Erreur lors de la modification', err);
+      console.error('[TaskProvider] Erreur lors de la modification', err);
     }
   };
 
-  // Suppression d'une tâche (optimiste)
   const deleteTask = async (id: number) => {
     const previous = tasks;
     dispatch({ type: 'DELETE_TASK', payload: id });
     try {
       await TaskApiService.deleteTask(id);
+      await cancelNotification(id);
     } catch (err) {
-      dispatch({ type: 'SET_TASKS', payload: previous }); // rollback
-      console.error('Erreur lors de la suppression', err);
+      dispatch({ type: 'SET_TASKS', payload: previous });
+      console.error('[TaskProvider] Erreur lors de la suppression', err);
     }
   };
 
-  // Toggle completed
   const toggleTask = async (id: number) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
@@ -109,8 +146,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     try {
       await TaskApiService.updateTask(id, updated);
     } catch (err) {
-      dispatch({ type: 'EDIT_TASK', payload: task }); // rollback
-      console.error('Erreur lors du toggle', err);
+      dispatch({ type: 'EDIT_TASK', payload: task });
+      console.error('[TaskProvider] Erreur lors du toggle', err);
     }
   };
 
@@ -121,7 +158,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook pour utiliser le contexte
 export function useTasks() {
   return useContext(TaskContext);
 }

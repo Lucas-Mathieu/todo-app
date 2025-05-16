@@ -7,6 +7,7 @@ type Task = {
   description?: string;
   completed: boolean;
   category: string;
+  dueDate?: string;
 };
 
 type Props = {
@@ -34,6 +35,21 @@ const ModalTaskDetail: React.FC<Props> = ({ visible, task, onClose }) => {
           <Text style={styles.text}>{task.category}</Text>
           <Text style={styles.label}>Statut :</Text>
           <Text style={styles.text}>{task.completed ? 'Terminée' : 'En cours'}</Text>
+          {task.dueDate && (
+            <>
+              <Text style={styles.label}>Échéance :</Text>
+              <Text style={styles.text}>
+                {new Date(task.dueDate).toLocaleString('fr-FR', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </Text>
+            </>
+          )}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeText}>Fermer</Text>
           </TouchableOpacity>

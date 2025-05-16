@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import TaskForm from '../../../components/TaskForm';
+import TaskForm from '@/components/TaskForm';
 import { Ionicons } from '@expo/vector-icons';
 import { useTasks } from '@/context/TaskContext';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { Category } from '@/types';
 
 export default function EditTaskScreen() {
   const { id } = useLocalSearchParams();
@@ -24,12 +25,18 @@ export default function EditTaskScreen() {
     );
   }
 
-  const handleSubmit = (title: string, description: string, category: string) => {
+  const handleSubmit = (
+    title: string,
+    description: string,
+    category: Category,
+    dueDate?: string
+  ) => {
     editTask({
       ...task,
       title,
       description,
       category,
+      dueDate,
     });
     router.back();
   };
@@ -42,7 +49,8 @@ export default function EditTaskScreen() {
       <TaskForm
         initialTitle={task.title}
         initialDescription={task.description}
-        initialCategory={task.category}
+        initialCategory={task.category as Category}
+        initialDueDate={task.dueDate}
         onSubmit={handleSubmit}
       />
     </View>
