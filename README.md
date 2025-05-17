@@ -28,7 +28,7 @@ yarn install
 
 Cela installera automatiquement tous les modules nécessaires à partir du `package.json`.
 
-### b) ### b) Installation des dépendances (front)
+### c) Installation des dépendances (front)
 
 Dans le dossier `TodoApp`, tu trouveras aussi un fichier `package.json` qui référence toutes les dépendances de l’application mobile (Expo, React Native, etc.).
 
