@@ -1,12 +1,52 @@
 # 📱 TodoApp – Guide de démarrage
 
-## 1. Cloner le projet
+## 1. installer le projet
+
+### a) Cloner le projet
 
 ```sh
 git clone https://github.com/Lucas-Mathieu/todo-app.git
 cd TodoApp
 ```
 
+### b) Installation des dépendances (back)
+
+Dans le dossier `todo-api`, tu trouveras un fichier `package.json` contenant toutes les dépendances nécessaires au serveur (Express, Prisma, etc.).
+
+Pour installer tous les packages listés dans ce fichier :
+
+```sh
+cd todo-api
+npm install
+```
+
+ou
+
+```sh
+yarn install
+```
+
+Cela installera automatiquement tous les modules nécessaires à partir du `package.json`.
+
+### b) ### b) Installation des dépendances (front)
+
+Dans le dossier `TodoApp`, tu trouveras aussi un fichier `package.json` qui référence toutes les dépendances de l’application mobile (Expo, React Native, etc.).
+
+Pour installer tous les packages listés dans ce fichier :
+
+```sh
+cd ../TodoApp
+npm install
+```
+
+ou
+
+```sh
+yarn install
+```
+
+
+---
 
 ---
 
